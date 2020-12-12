@@ -1,0 +1,7 @@
+.idea/*
+backend/.idea/
+backend/node_modules/
+backend/db/postit.db
+frontend/.idea/
+frontend/node_modules/
+frontend/coverage/
