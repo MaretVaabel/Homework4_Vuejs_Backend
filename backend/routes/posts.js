@@ -25,19 +25,56 @@ router.get('/', authorize, (request, response) => {
 router.post('/', authorize,  (request, response) => {
 
     // Endpoint to create a new post
-
 });
 
 
 router.put('/:postId/likes', authorize, (request, response) => {
 
     // Endpoint for current user to like a post
+    let postId = request.params.postId;
+    let userId = request.currentUser.id;
+
+    PostModel.getLikesByUserIdAndPostId(userId, postId, (rows) => {
+        if (rows.length) {
+            response.status(409)
+                .json({
+                    code: 'already_liking',
+                    message: 'You are already liking this post'
+                });
+        } else {
+            PostModel.like(userId, postId, () => {
+                response.json({
+                    ok: true
+                })
+            })
+        }
+    })
+
 });
 
 router.delete('/:postId/likes', authorize, (request, response) => {
 
     // Endpoint for current user to unlike a post
+    let userId = request.currentUser.id;
+    let postId = request.params.postId;
 
+    PostModel.getLikesByUserIdAndPostId(userId, postId, (rows) => {
+
+        if (!rows.length) {
+            response.status(409)
+                .json({
+                    code: 'not_liking',
+                    message: 'You are not liking this post'
+                });
+        } else {
+            PostModel.unlike(userId, postId, () => {
+
+                response.json({
+                    ok: true
+                })
+            })
+        }
+    })
 });
 
 module.exports = router;
