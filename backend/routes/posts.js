@@ -25,7 +25,22 @@ router.get('/', authorize, (request, response) => {
 router.post('/', authorize,  (request, response) => {
 
     // Endpoint to create a new post
-
+    let post = request.body;
+    post.userId = request.currentUser.id;
+    
+    if((!post.media.type && post.media.url) || (post.media.type && !post.media.url)) {
+        response.status(409)
+        .json({
+            code: 'missing_url_or_type',
+            message: 'You are missing media url or type'
+        });
+    }else {
+        PostModel.create(post, (rows, context) => {
+            PostModel.getByIds([context.lastID], request.currentUser.id, (posts) => { 
+                response.status(201).json(posts[0])
+            })
+        });
+    }
 });
 
 
